@@ -7,10 +7,10 @@ from time import sleep
 import json
 import jwt
 
-PROCESS             = "verify_tokens"
+PROCESS             = "check_tokens"
 CRIPTOGRAFY_PROCESS = "criptografy"
 
-TOKEN_KEY           = "secret key"
+TOKEN_KEY           = "secret_key"
 
 def start():
     global offset
@@ -18,7 +18,7 @@ def start():
     
     client =  KafkaClient(
         bootstrap_servers=["kafka:29092"],
-        api_version=(90, 10, 1)
+        api_version=(0, 10, 1)
     )
     
     client.add_topic(PROCESS)
@@ -34,7 +34,7 @@ def verify_token(token):
     
     if token:
         try: 
-            response = jwt.decode(token, key, algorithms="HS256")
+            user = jwt.decode(token, key, algorithms="HS256")
         except: 
             response = "Token inválido."
     else:
