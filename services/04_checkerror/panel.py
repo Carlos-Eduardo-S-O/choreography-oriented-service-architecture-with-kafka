@@ -12,20 +12,21 @@ request_panel = KafkaConsumer(
     consumer_timeout_ms=1000
 )
 
-partition = TopicPartition("verify_tokens", 0)
+partition = TopicPartition("check_error", 0)
 request_panel.assign([partition])
 
 request_panel.seek_to_beginning(partition)
+
 offset = 0
 
 while True:
-    print("Esperando por tokens para analisar...")
+    print("Esperando requisições...")
     
     for request in request_panel:
         offset = request.offset + 1
         
         request_data = json.loads(request.value)
-        print(f"Resultado da verificação: {request_data}")
+        print(f"Dados da requisição: {request_data}")
         
     request_panel.seek(partition, offset)
         

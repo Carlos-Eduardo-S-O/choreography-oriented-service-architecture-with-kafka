@@ -96,17 +96,8 @@ def execute():
     
     ID = hashlib.sha256(ID.encode("utf-8")).hexdigest()
     
-    verification = json.dumps({
-        "status": 0,
-        "id": ID,
-        "message": "A decriptação do conteúdo falhou!",
-        "header": "",
-        "token": ""
-    }).encode("utf-8")
-    
     sleep(3)
     if not error:
-        
         info = json.loads(decrypted_data)
         
         verification = json.dumps({
@@ -114,11 +105,21 @@ def execute():
             "id": ID,
             "message": "Verificação iniciada com sucesso!",
             "header": info["header"],
-            "token": info["token"]
+            "token": info["token"],
+            "log": "000"
         }).encode("utf-8")
         
-        record_message_on_kafka_service(PROCESS, verification)
+        response = record_message_on_kafka_service(PROCESS, verification)
     else:
+        verification = json.dumps({
+            "status": 0,
+            "id": ID,
+            "message": "A decriptação do conteúdo falhou!",
+            "header": "",
+            "token": "",
+            "log": "100"
+        }).encode("utf-8")
+        
         record_message_on_kafka_service(PROCESS, verification)
         response = "Error, verifique as informações e refaça a requisição."
     

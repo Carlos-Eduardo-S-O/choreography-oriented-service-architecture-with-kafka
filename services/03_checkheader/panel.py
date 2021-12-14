@@ -12,14 +12,14 @@ request_panel = KafkaConsumer(
     consumer_timeout_ms=1000
 )
 
-partition = TopicPartition("criptografy", 0)
+partition = TopicPartition("check_headers", 0)
 request_panel.assign([partition])
 
 request_panel.seek_to_beginning(partition)
 offset = 0
 
 while True:
-    print("Esperando requisições...")
+    print("Esperando por cabeçalhos para analisar...")
     
     for request in request_panel:
         offset = request.offset + 1

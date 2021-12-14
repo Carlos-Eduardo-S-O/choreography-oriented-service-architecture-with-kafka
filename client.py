@@ -16,7 +16,7 @@ from urllib.parse import urlencode
 faker = Faker(['pt_BR'])
 faker.add_provider(internet)
 
-AUTHENTICATION_ROUTE = "http://172.23.0.7:5000/"
+AUTHENTICATION_ROUTE = "http://172.20.0.4:5000/"
 INFO                 = "info"
 EXECUTE              = "execute"
 TOKEN_KEY            = "secret_key"
@@ -120,10 +120,10 @@ def send_message():
 if __name__ == "__main__":
     try:
         while True:
-            response = send_message()
             print("Enviando mensagem...")
-            sleep(6)
-        
+            response = send_message()
             print(f"Resposta do sistema: {response}")
+            
+            sleep(10)
     except KeyboardInterrupt:
         print("Obrigado por utilizar os nossos serviços!!!")

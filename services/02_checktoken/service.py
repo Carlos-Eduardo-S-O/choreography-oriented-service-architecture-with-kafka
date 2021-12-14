@@ -27,7 +27,7 @@ def start():
 def get_token_key():
     return TOKEN_KEY
 
-def verify_token(token):
+def check_token(token):
     response = "ok"
     user = None
     key = get_token_key()
@@ -81,8 +81,10 @@ def execute():
         
         id = request_information["id"]
         status = request_information["status"]
+        message = request_information["message"]
+        log = request_information["log"]
         
-        response, user = verify_token(token)
+        response, user = check_token(token)
         
         if status != 0:
             if user:
@@ -92,7 +94,8 @@ def execute():
                     "message": "Sucesso na verificação do token!",
                     "header": request_information["header"],
                     "token": request_information["token"],
-                    "user": user
+                    "user": user,
+                    "log": "000"
                 }).encode("utf-8")
                 
                 record_message_on_kafka_service(PROCESS, verification)
@@ -102,10 +105,22 @@ def execute():
                     "id": id,
                     "message": response,
                     "header": "",
-                    "token": ""
+                    "token": "",
+                    "log": "010"
                 }).encode("utf-8")
                 
                 record_message_on_kafka_service(PROCESS, verification)
+        else:
+            verification = json.dumps({
+                "status": 0,
+                "id": id,
+                "message": message,
+                "header": "",
+                "token": "",
+                "log": log
+            }).encode("utf-8")
+            
+            record_message_on_kafka_service(PROCESS, verification)
 
 if __name__ == "__main__":
     start()
