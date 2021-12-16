@@ -16,7 +16,7 @@ from urllib.parse import urlencode
 faker = Faker(['pt_BR'])
 faker.add_provider(internet)
 
-AUTHENTICATION_ROUTE = "http://172.20.0.4:5000/"
+AUTHENTICATION_ROUTE = "http://172.18.0.6:5000/"
 INFO                 = "info"
 EXECUTE              = "execute"
 TOKEN_KEY            = "secret_key"

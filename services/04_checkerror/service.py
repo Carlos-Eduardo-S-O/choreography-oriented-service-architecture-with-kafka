@@ -99,6 +99,7 @@ def execute():
         
         if status == 1:
             verification = json.dumps({
+                "status": 1,
                 "id": request_information["id"],
                 "header": request_information["header"],
                 "token": request_information["token"],
@@ -110,9 +111,11 @@ def execute():
             record_message_on_kafka_service(PROCESS, verification)
         else:
             verification = json.dumps({
+                "status": 0,
                 "id": request_information["id"],
                 "header": request_information["header"],
                 "token": request_information["token"],
+                "user": "",
                 "verification": response,
                 "datetime": request_verification_date
             }).encode("utf-8")
