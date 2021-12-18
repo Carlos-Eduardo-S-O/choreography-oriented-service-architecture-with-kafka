@@ -14,15 +14,23 @@ def header(id):
     aux_print()
 
 def body(status, message, header, token):
-    message = f"{GREEN}{message}{RESET}"
-    
     if status == 0:
         message = f"{RED}{message}{RESET}"
+    else:
+        message = f"{GREEN}{message}{RESET}"
         
     print(f"Resposta do sistema: {message}")
-    print("Cabeçalho da requisição:")
-    print_header(header)
-    print(f"Token de autenticação:\n{token}")
+    
+    if header != "":
+        print("Cabeçalho da requisição:")
+        print_header(header)
+    else:
+        print("Cabeçalho da requisição: requisição inválida")
+    
+    if token != "":
+        print(f"Token de autenticação:\n{token}")
+    else:
+        print("Token da requisição: requisição inválida")
 
 def print_header(header):
     space    = "   -"
@@ -61,7 +69,7 @@ def print_info(info):
     print()
     
 def goodbye():
-    print("Desligando o painel...")
+    print("\nDesligando o painel...")
     sleep(2)
     print("Obrigado por utilizar os nossos serviços")
 

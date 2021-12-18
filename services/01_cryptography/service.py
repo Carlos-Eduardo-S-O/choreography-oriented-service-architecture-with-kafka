@@ -85,7 +85,7 @@ def record_message_on_kafka_service(process, value):
 
 @service.route("/execute")
 def execute():
-    response = "ok"
+    response = {}
     
     data = unquote(request.args.get("data"))
     
@@ -96,7 +96,11 @@ def execute():
     
     ID = hashlib.sha256(ID.encode("utf-8")).hexdigest()
     
+    response["id"] = ID
     sleep(3)
+    
+    verification = None
+    
     if not error:
         info = json.loads(decrypted_data)
         
@@ -109,7 +113,7 @@ def execute():
             "log": "000"
         }).encode("utf-8")
         
-        response = record_message_on_kafka_service(PROCESS, verification)
+        response["result"] = "Success, recebemos a sua requisição!" 
     else:
         verification = json.dumps({
             "status": 0,
@@ -120,10 +124,12 @@ def execute():
             "log": "100"
         }).encode("utf-8")
         
-        record_message_on_kafka_service(PROCESS, verification)
-        response = "Error, verifique as informações e refaça a requisição."
+        response["result"] = "Error, verifique as informações e refaça a requisição."
     
-    return response
+    if verification:
+        record_message_on_kafka_service(PROCESS, verification)
+    
+    return jsonify(response)
 
 if __name__ == '__main__':
     start()

@@ -86,6 +86,8 @@ def execute():
         
         response, user = check_token(token)
         
+        verification = None
+        
         if status != 0:
             if user:
                 verification = json.dumps({
@@ -97,8 +99,6 @@ def execute():
                     "user": user,
                     "log": "000"
                 }).encode("utf-8")
-                
-                record_message_on_kafka_service(PROCESS, verification)
             else:
                 verification = json.dumps({
                     "status": 0,
@@ -106,21 +106,23 @@ def execute():
                     "message": response,
                     "header": "",
                     "token": "",
+                    "user": "",
                     "log": "010"
                 }).encode("utf-8")
-                
-                record_message_on_kafka_service(PROCESS, verification)
         else:
             verification = json.dumps({
                 "status": 0,
                 "id": id,
                 "message": message,
                 "header": "",
+                "user": "",
                 "token": "",
                 "log": log
             }).encode("utf-8")
-            
+        
+        if verification:
             record_message_on_kafka_service(PROCESS, verification)
+
 
 if __name__ == "__main__":
     start()

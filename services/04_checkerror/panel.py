@@ -15,17 +15,30 @@ def header(id):
     aux_print()
 
 def body(status, verification, header, token, payload, datetime):
-    verification = f"{GREEN}{verification}{RESET}"
-    
     if status == 0:
         verification = f"{RED}{verification}{RESET}"
+    else:
+        verification = f"{GREEN}{verification}{RESET}"
         
     print(f"Resposta das verificações: {verification}")
-    print("Cabeçalho da requisição:")
-    print_header(header)
-    print("Informações do usuário:")
-    print_user(payload)
-    print(f"Token de autenticação:\n{token}")
+    
+    if header != "":
+        print("Cabeçalho da requisição:")
+        print_header(header)
+    else:
+        print("Cabeçalho da requisição: sem informações")
+    
+    if payload != "":
+        print("Informações do usuário:")
+        print_user(payload)
+    else:
+        print("Informações do usuário: sem informações")
+    
+    if token != "":
+        print(f"Token de autenticação:\n{token}")
+    else: 
+        print("Token de autenticação: sem informações")
+    
     print(f"requisição verificada às: {datetime}")
 
 def print_header(header):
@@ -75,7 +88,7 @@ def aux_print():
 def print_info(info):
     status  = info["status"]
     id      = info["id"]
-    verification = "verification"
+    verification = info["verification"]
     request_header  = info["header"]
     token   = info["token"]
     payload = info["user"]
@@ -88,7 +101,7 @@ def print_info(info):
     print()
     
 def goodbye():
-    print("Desligando o painel...")
+    print("\nDesligando o painel...")
     sleep(2)
     print("Obrigado por utilizar os nossos serviços")
     
@@ -115,6 +128,7 @@ try:
             offset = request.offset + 1
             
             request_data = json.loads(request.value)
+            
             print_info(request_data)
             
         request_panel.seek(partition, offset)

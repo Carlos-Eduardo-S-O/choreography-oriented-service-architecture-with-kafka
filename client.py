@@ -1,129 +1,110 @@
-import base64
-import jwt
-import datetime
-import urllib.request as request
-import json
-import random
-import string
-import hashlib
-from faker import Faker 
-from Crypto.Cipher import PKCS1_v1_5
-from Crypto.PublicKey import RSA
-from faker.providers import internet
+from utilits import send_message, get_url_to_security_verification
 from time import sleep
-from urllib.parse import urlencode
+from random import randint, choice
+from colored import fg as foreground, attr as attribute
 
-faker = Faker(['pt_BR'])
-faker.add_provider(internet)
+RED   = foreground("red")
+GREEN = foreground("green")
+RESET = attribute("reset")
 
-AUTHENTICATION_ROUTE = "http://172.18.0.6:5000/"
-INFO                 = "info"
-EXECUTE              = "execute"
-TOKEN_KEY            = "secret_key"
-PUBLIC_KEY           = "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAt0seI15IbBvlOEP6yO4V\naUZTldEOc5aMUxqeDC5Hx4PY4B4J8A77E0sObamj+2YCHBNDH5kA1UBTl+soDNdT\nBSx0yf7SiRvsFnz4Jo1LZUo1RvqAOftrPVdNM3Xop32VFE+OPRjsReERwBRnCYvH\naGzSI+5RhPqVx1Wu1K9TvqF5OlSqS7ehWfO4F1wxQiIh6KaAb2sKUvUO38ESVVdn\n0WHKU1S0+uRil+y0JxV1EOebsEKtf1gf2gu77sc7NBytmpYR4A20Opi6Y/UUwo0d\ngI951CQQ8FftQ1MwoXL5AEHEH7Mfsr5+IrX277Jrs0Dn5HzSon3j5wgSbBdydkD2\nA1zZCsWDs9NTC9RS9VZnArj0DDcOfuUQXSclRXdhaueDeHksWFrPu5+Qp3Cnna7t\nmeS7AQdVcmHs65MBTYZ49VVWRtq/yDNxu9Bg+ZMnnREXN+5l3+I0Z/8a5XZj8wS0\nQsAuhCEiqQ5z2tCHymuX6ClHmur3ahH/R5+4DOertJX8XfwL9d9iGnhMeS+LUXF4\nBKqjPNUL1K14Wb970pGCv0dm1VUqPwRkFv6WwCua7/IC+X9KqsR7Ln8TcYgmfWFp\n+H45I++U/9RbvxmMY8MTM/8ee4GLai3ABJUT6bbdYSmorefJR3/VaMCLSUovDbaI\ndegqK9HoM9PkSQg9rB2tUiMCAwEAAQ==\n-----END PUBLIC KEY-----"
-CLIENT_VERSION       = "1.0.0"
+ERROR_PERCENT = 50
 
-def encrypt(plaintext):
-    error = None
-    encrypted = ""
+# t for tokens, h for headers and c for cryptography errors. "" for not error
+ERROR_TYPE    = ["c", "h", "t"]
+ERROR = {
+    "c": "Erro de criptografia, o sistema apontará um erro na 1ª verificação", 
+    "h": "Erro no cabeçalho, o sistema apontará um erro na 2ª verificação", 
+    "t": "Erro no token, o sistema apontará um erro na 3ª verificação"
+}
 
-    try:
-        # Load public key
-        public_key = RSA.importKey(PUBLIC_KEY)
-        cipher = PKCS1_v1_5.new(public_key)
-
-        encrypted = plaintext.encode('utf-8')
-        encrypted = cipher.encrypt(encrypted)
-        encrypted = base64.b64encode(encrypted)
-        encrypted = encrypted.decode('utf-8')
-    except Exception as e:
-        error = "ERROR_UNABLE_TO_COMPLETE: " + str(e)
-
-    return error, encrypted
-
-def get_service_info():
-    url = AUTHENTICATION_ROUTE + INFO
-
-    return access_url(url)
-
-def get_key():
-    return TOKEN_KEY
-
-def access_url(url):
-    response = request.urlopen(url)
-    data = response.read()
+def radom_send_request():
+    response = None
+    random_percent = randint(0, 100)
     
-    return data.decode("utf-8")
+    if random_percent <= ERROR_PERCENT:
+        error = choice(ERROR_TYPE)
+        print(f"{RED}Messagem com erro, porcentagem sorteada: {random_percent} {RESET}")
+        print(f"Tipo do erro: {ERROR.get(error)}")
+        
+        url = get_url_to_security_verification(error)
+        print(f"Requisição:{RED} {url} {RESET}")
+        
+        response = send_message(url)
+    else:
+        print(f"{GREEN}Messagem sem erros...{RESET}")
+        
+        url = get_url_to_security_verification("")
+        print(f"Requisição:{GREEN} {url} {RESET}")
+        
+        response = send_message(url)
+    return response
 
-def generate_user():
-    ID = "".join(random.choice(string.ascii_letters + string.punctuation) for _ in range(12))
-    
-    ID = hashlib.sha256(ID.encode("utf-8")).hexdigest()
-    
-    user = {
-        "id": ID,
-        "name": faker.name(),
-        "age": random.randint(0,120)
-    }
-    
-    return user
 
-def generate_valid_token():
-    user = generate_user()
+# Empty str for not error, c for cryptography, h for header and t for token error 
+def send_request(option):
+    response = None
     
-    token = jwt.encode({"user": user, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=5000)}, get_key(), algorithm="HS256")
-            
-    return token.decode("utf-8")
+    if option == "":
+        print(f"{GREEN}Messagem sem erros...{RESET}")
+        
+        url = get_url_to_security_verification("")
+        print(f"Requisição:{GREEN} {url} {RESET}")
+        
+        response = send_message(url)
+    else:
+        print(f"{RED}Messagem com erro{RESET}")
+        print(f"Tipo do erro: {ERROR.get(option)}")
+        
+        url = get_url_to_security_verification(option)
+        print(f"Requisição:{RED} {url} {RESET}")
+        
+        response = send_message(url)
+    return response
 
-def generate_valid_header():
-    ip = faker.ipv4_private()
-    author = faker.name()
-    version =  str(random.randint(3, 5)) + "." + str(random.randint(1, 9)) + "." + str(random.randint(1, 9))
-    device = random.choice(["mobile", "desktop"])
-    location = random.choice(["América", "Europa", "África", "Ásia", "Oceania", "Antártida"])
-    
-    hearder = {
-        "ip": ip,
-        "author": author,
-        "api": version,
-        "device": device,
-        "location": location
-    }
-    
-    return hearder
-
-def get_url_to_security_verification():
-    url = None
-    
-    header =  generate_valid_header()
-    token  =  generate_valid_token()
-    
-    data   =  json.dumps({
-            "header": header,
-            "token": token
-        })
-    
-    error, encrypted_data =  encrypt(data)
-    
-    encoded_data = urlencode({"data": encrypted_data})
-    
-    if not error:
-        url = AUTHENTICATION_ROUTE + EXECUTE + "?" + encoded_data
-    
-    return url
-
-def send_message():
-    url = get_url_to_security_verification()
-    
-    return access_url(url)
-
-if __name__ == "__main__":
+def run_random_test():
     try:
         while True:
-            print("Enviando mensagem...")
-            response = send_message()
+            space = " "
+            lines = 127
+            print("-" * lines)
+            print(f"{space * 55}Enviando mensagem")
+            print("-" * lines)
+            
+            response = radom_send_request()
+            
+            print()
             print(f"Resposta do sistema: {response}")
+            print("-" * lines, "\n")
             
             sleep(10)
     except KeyboardInterrupt:
+        print("\nParando o sistema...")
+        sleep(2)
         print("Obrigado por utilizar os nossos serviços!!!")
+
+def run_objective_test():
+    tests = ERROR_TYPE
+    tests.append("")
+    
+    try:
+        for test in tests:
+            space = " "
+            lines = 127
+            print("-" * lines)
+            print(f"{space * 55}Enviando mensagem")
+            print("-" * lines)
+            
+            response = send_request(test)
+            
+            print()
+            print(f"Resposta do sistema: {response}")
+            print("-" * lines, "\n")
+            
+            sleep(10)
+    except KeyboardInterrupt:
+        print("\nParando o sistema...")
+        sleep(2)
+        print("Obrigado por utilizar os nossos serviços!!!")
+
+if __name__ == "__main__":
+    run_objective_test()

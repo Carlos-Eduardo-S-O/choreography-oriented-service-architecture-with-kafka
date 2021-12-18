@@ -97,6 +97,8 @@ def execute():
         response = str(check_error(log))
         request_verification_date = str(datetime.utcnow())
         
+        verification = None
+        
         if status == 1:
             verification = json.dumps({
                 "status": 1,
@@ -108,7 +110,6 @@ def execute():
                 "datetime": request_verification_date
             }).encode("utf-8")
 
-            record_message_on_kafka_service(PROCESS, verification)
         else:
             verification = json.dumps({
                 "status": 0,
@@ -119,8 +120,10 @@ def execute():
                 "verification": response,
                 "datetime": request_verification_date
             }).encode("utf-8")
-            
+        
+        if verification:
             record_message_on_kafka_service(PROCESS, verification)
+        
 if __name__ == "__main__":
     start()
     
