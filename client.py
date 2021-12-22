@@ -107,4 +107,4 @@ def run_objective_test():
         print("Obrigado por utilizar os nossos serviços!!!")
 
 if __name__ == "__main__":
-    run_objective_test()
+    run_random_test()

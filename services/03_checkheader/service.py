@@ -101,7 +101,7 @@ def execute():
                 verification = json.dumps({
                     "status": 0,
                     "id": id,
-                    "message": response,
+                    "message": "Cabeçalho inválido.",
                     "header": "",
                     "token": "",
                     "user": "",
